@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Paper — the surface */
+    --paper: 38 25% 96%;
+    --paper-deep: 38 18% 92%;
+    --paper-rim: 38 14% 84%;
+    --paper-line: 38 12% 76%;
+
+    /* Ink — the text */
+    --ink: 30 10% 8%;
+    --ink-soft: 30 8% 28%;
+    --ink-mute: 30 6% 50%;
+    --ink-ghost: 30 5% 70%;
+
+    /* Accent — vermillion */
+    --accent: 14 88% 48%;
+    --accent-deep: 14 88% 38%;
+    --accent-tint: 14 88% 94%;
+
+    /* Money */
+    --owed: 14 88% 48%;
+    --owed-to: 145 50% 28%;
+
+    /* Privacy — deep indigo */
+    --privacy: 248 60% 36%;
+    --privacy-tint: 248 60% 94%;
+
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+
+  html, body {
+    background-color: hsl(var(--paper));
+    color: hsl(var(--ink));
+    font-family: var(--font-body);
+  }
+
+  body {
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' /%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' /%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background-color: hsl(var(--ink));
+    color: hsl(var(--paper));
+  }
+}
+
+@layer utilities {
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tear {
+    background-image: linear-gradient(
+      to right,
+      hsl(var(--paper-rim)) 50%,
+      transparent 50%
+    );
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+    background-position: top;
+    height: 1px;
+  }
+
+  .tear-edge {
+    position: relative;
+  }
+  .tear-edge::before,
+  .tear-edge::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: hsl(var(--paper));
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .tear-edge::before { left: -6px; }
+  .tear-edge::after { right: -6px; }
+
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+/* Wallet adapter modal restyling — minimal override to fit paper aesthetic */
+.wallet-adapter-button {
+  font-family: var(--font-body) !important;
+  font-weight: 600 !important;
+  border-radius: 4px !important;
+  background-color: hsl(var(--ink)) !important;
+  color: hsl(var(--paper)) !important;
+  height: 40px !important;
+  padding: 0 20px !important;
+  font-size: 14px !important;
+  transition: background-color 150ms !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: hsl(var(--ink-soft)) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: hsl(var(--paper-deep)) !important;
+  border: 1px solid hsl(var(--paper-rim)) !important;
+  border-radius: 4px !important;
+}
+
+.wallet-adapter-modal-title {
+  font-family: var(--font-display) !important;
+  color: hsl(var(--ink)) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 0 8px 0 !important;
+}
+
+.wallet-adapter-modal-list li {
+  background-color: hsl(var(--paper)) !important;
+  border: 1px solid hsl(var(--paper-rim)) !important;
+  border-radius: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background-color: transparent !important;
+  color: hsl(var(--ink)) !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background-color: hsl(var(--paper-rim)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 100ms !important;
+  }
+}
