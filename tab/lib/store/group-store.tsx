@@ -37,7 +37,8 @@ export interface Settlement {
 export interface Group {
   id: string;
   name: string;
-  emoji: string;
+  /** Optional cover label (1-2 chars). If absent, derived from name. */
+  cover?: string;
   description?: string;
   members: Member[];
   createdAt: number;
@@ -52,7 +53,7 @@ interface GroupStoreState {
 
 interface GroupStoreApi extends GroupStoreState {
   setCurrentUserWallet: (wallet: string | null) => void;
-  createGroup: (input: { name: string; emoji: string; description?: string; members: Member[] }) => Group;
+  createGroup: (input: { name: string; cover?: string; description?: string; members: Member[] }) => Group;
   getGroup: (id: string) => Group | undefined;
   addExpense: (input: Omit<Expense, "id" | "createdAt">) => Expense;
   addSettlement: (input: Omit<Settlement, "id" | "createdAt">) => Settlement;
@@ -129,7 +130,7 @@ export function GroupStoreProvider({ children }: { children: ReactNode }) {
       const group: Group = {
         id: uid(),
         name: input.name,
-        emoji: input.emoji,
+        cover: input.cover,
         description: input.description,
         members: input.members,
         createdAt: Date.now(),

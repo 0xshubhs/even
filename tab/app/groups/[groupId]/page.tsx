@@ -13,6 +13,7 @@ import { LedgerRow } from "@/components/group/LedgerRow";
 import { useGroupStore } from "@/lib/store/group-store";
 import { computeGroupDebts } from "@/lib/debt-graph/compute";
 import { baseToUsdc, shortAddress } from "@/lib/utils";
+import { Monogram } from "@/components/group/Monogram";
 
 export default function GroupDetailPage() {
   const router = useRouter();
@@ -72,8 +73,8 @@ export default function GroupDetailPage() {
           <Link href="/groups" className="eyebrow text-ink-mute hover:text-ink">
             ← All groups
           </Link>
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-5xl leading-none">{group.emoji}</span>
+          <div className="flex items-center gap-4 flex-wrap">
+            <Monogram name={group.name} size="lg" />
             <h1 className="font-display text-4xl tracking-tight font-semibold">{group.name}</h1>
           </div>
           <div className="flex items-center gap-3 text-sm text-ink-mute flex-wrap">

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Receipt } from "@/components/receipt/Receipt";
+import { Monogram } from "@/components/group/Monogram";
 import { baseToUsdc } from "@/lib/utils";
 
 interface GroupCardProps {
   group: {
     id: string;
     name: string;
-    emoji: string;
     memberCount: number;
     yourBalanceBase: bigint;
   };
@@ -21,11 +21,13 @@ export function GroupCard({ group }: GroupCardProps) {
     <Link href={`/groups/${group.id}`} className="group block">
       <Receipt className="hover:bg-paper transition-colors duration-200">
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <div className="text-3xl leading-none">{group.emoji}</div>
-            <div className="font-display text-2xl tracking-tight pt-2 truncate">{group.name}</div>
-            <div className="font-mono text-xs text-ink-mute uppercase tracking-wider">
-              {group.memberCount} {group.memberCount === 1 ? "member" : "members"}
+          <div className="space-y-3 min-w-0">
+            <Monogram name={group.name} size="md" />
+            <div>
+              <div className="font-display text-2xl tracking-tight truncate">{group.name}</div>
+              <div className="font-mono text-xs text-ink-mute uppercase tracking-wider mt-1">
+                {group.memberCount} {group.memberCount === 1 ? "member" : "members"}
+              </div>
             </div>
           </div>
 

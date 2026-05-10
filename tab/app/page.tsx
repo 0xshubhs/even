@@ -31,8 +31,8 @@ export default function LandingPage() {
 
             <div className="flex items-center gap-3 flex-wrap">
               <ConnectButton />
-              <Link href="/groups">
-                <Button variant="paper">View groups →</Button>
+              <Link href="/dashboard">
+                <Button variant="paper">Open dashboard →</Button>
               </Link>
             </div>
 

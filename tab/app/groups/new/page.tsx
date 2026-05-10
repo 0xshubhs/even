@@ -8,10 +8,9 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/Button";
+import { Monogram, deriveInitials } from "@/components/group/Monogram";
 import { useGroupStore, type Member } from "@/lib/store/group-store";
 import { shortAddress } from "@/lib/utils";
-
-const EMOJI_CHOICES = ["🍝", "🏠", "✈️", "🎂", "🎁", "🍕", "☕", "💼", "🍻", "🚗"];
 
 export default function NewGroupPage() {
   const router = useRouter();
@@ -20,26 +19,17 @@ export default function NewGroupPage() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [emoji, setEmoji] = useState(EMOJI_CHOICES[0]);
   const [members, setMembers] = useState<Member[]>([]);
   const [walletInput, setWalletInput] = useState("");
   const [handleInput, setHandleInput] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-add the current user as the first member
   useEffect(() => {
     if (!connected || !publicKey) return;
     const wallet = publicKey.toBase58();
     setMembers((prev) => {
       if (prev.some((m) => m.wallet === wallet)) return prev;
-      return [
-        {
-          id: "you",
-          handle: "You",
-          wallet,
-        },
-        ...prev,
-      ];
+      return [{ id: "you", handle: "You", wallet }, ...prev];
     });
   }, [connected, publicKey]);
 
@@ -53,7 +43,6 @@ export default function NewGroupPage() {
       return;
     }
     try {
-      // Validate base58
       new PublicKey(wallet);
     } catch {
       setError("Invalid Solana wallet address.");
@@ -87,7 +76,7 @@ export default function NewGroupPage() {
     }
     const group = createGroup({
       name: name.trim(),
-      emoji,
+      cover: deriveInitials(name),
       description: description.trim() || undefined,
       members,
     });
@@ -102,34 +91,23 @@ export default function NewGroupPage() {
           ← All groups
         </Link>
 
-        <div className="space-y-2">
-          <div className="eyebrow text-ink-mute">New group</div>
-          <h1 className="font-display text-4xl tracking-tight font-semibold">Start a group</h1>
+        <div className="flex items-end gap-4">
+          <Monogram name={name || "?"} size="xl" />
+          <div className="space-y-2">
+            <div className="eyebrow text-ink-mute">New group</div>
+            <h1 className="font-display text-4xl tracking-tight font-semibold leading-none">
+              Start a group
+            </h1>
+          </div>
         </div>
 
         <div className="space-y-8">
-          {/* Emoji + Name */}
-          <div className="space-y-3">
-            <Label>Cover</Label>
-            <div className="flex flex-wrap gap-2">
-              {EMOJI_CHOICES.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => setEmoji(e)}
-                  className={`text-2xl w-10 h-10 flex items-center justify-center border ${
-                    emoji === e
-                      ? "border-ink bg-paper-deep"
-                      : "border-paper-rim hover:border-ink-mute"
-                  } transition-colors`}
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <Field label="Name" placeholder="Goa Trip 2026" value={name} onChange={setName} />
+          <Field
+            label="Name"
+            placeholder="Goa Trip 2026"
+            value={name}
+            onChange={setName}
+          />
           <Field
             label="Description (optional)"
             placeholder="What is this group for?"

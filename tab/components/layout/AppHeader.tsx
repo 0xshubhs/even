@@ -24,12 +24,20 @@ export function AppHeader() {
 
         <nav className="flex items-center gap-4">
           {connected && (
-            <Link
-              href="/groups"
-              className="text-sm text-ink-soft hover:text-ink transition-colors hidden sm:inline"
-            >
-              Groups
-            </Link>
+            <>
+              <Link
+                href="/dashboard"
+                className="text-sm text-ink-soft hover:text-ink transition-colors hidden sm:inline"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/groups"
+                className="text-sm text-ink-soft hover:text-ink transition-colors hidden sm:inline"
+              >
+                Groups
+              </Link>
+            </>
           )}
           {publicKey && (
             <span className="hidden md:inline font-mono text-xs text-ink-mute">

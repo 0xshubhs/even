@@ -23,7 +23,6 @@ export default function GroupsPage() {
       return {
         id: g.id,
         name: g.name,
-        emoji: g.emoji,
         memberCount: g.members.length,
         yourBalanceBase: balance,
       };
