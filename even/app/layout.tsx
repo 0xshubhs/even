@@ -3,9 +3,9 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Tab — Split anything. Settle privately.",
+  title: "Even — Split anything. Settle privately.",
   description:
-    "The shared-expenses app for crypto. Settle in stablecoins on Solana with payments shielded.",
+    "Track shared expenses with anyone. Settle in stablecoins on Solana, with the amounts shielded so members don't see each other's wallet histories.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

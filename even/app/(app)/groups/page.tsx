@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { Plus } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/Button";
 import { GroupCard } from "@/components/group/GroupCard";
 import { useGroupStore } from "@/lib/store/group-store";
@@ -30,49 +29,46 @@ export default function GroupsPage() {
   }, [groups, expenses, settlements, myWallet]);
 
   return (
-    <>
-      <AppHeader />
-      <div className="max-w-5xl mx-auto px-6 py-12 space-y-10">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <div className="eyebrow text-ink-mute">Your shared expenses</div>
-            <h1 className="font-display text-4xl tracking-tight font-semibold mt-1">Groups</h1>
-          </div>
-          <Link href="/groups/new">
-            <Button variant="primary">
-              <Plus className="w-4 h-4 mr-1.5" /> New group
-            </Button>
-          </Link>
+    <div className="max-w-5xl mx-auto px-6 py-12 space-y-10">
+      <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div>
+          <div className="eyebrow text-privacy">Your shared expenses</div>
+          <h1 className="font-display text-4xl tracking-tight font-semibold mt-1">Groups</h1>
         </div>
-
-        <div className="tear" />
-
-        {!connected ? (
-          <EmptyState
-            title="Connect a wallet to start"
-            body="Tab uses your Solana wallet to identify you and to settle debts privately. Connect Phantom or Solflare to begin."
-          />
-        ) : decoratedGroups.length === 0 ? (
-          <EmptyState
-            title="No groups yet"
-            body="Start a group to split anything with anyone — a trip, an apartment, a coworker gift."
-            cta={
-              <Link href="/groups/new">
-                <Button variant="primary">
-                  <Plus className="w-4 h-4 mr-1.5" /> New group
-                </Button>
-              </Link>
-            }
-          />
-        ) : (
-          <div className="grid sm:grid-cols-2 gap-6">
-            {decoratedGroups.map((g) => (
-              <GroupCard key={g.id} group={g} />
-            ))}
-          </div>
-        )}
+        <Link href="/groups/new">
+          <Button variant="primary">
+            <Plus className="w-4 h-4 mr-1.5" /> New group
+          </Button>
+        </Link>
       </div>
-    </>
+
+      <div className="tear" />
+
+      {!connected ? (
+        <EmptyState
+          title="Connect a wallet to start"
+          body="Even uses your Solana wallet to identify you and to settle debts privately. Connect Phantom or Solflare to begin."
+        />
+      ) : decoratedGroups.length === 0 ? (
+        <EmptyState
+          title="No groups yet"
+          body="Start a group to split anything with anyone — a trip, an apartment, a coworker gift."
+          cta={
+            <Link href="/groups/new">
+              <Button variant="primary">
+                <Plus className="w-4 h-4 mr-1.5" /> New group
+              </Button>
+            </Link>
+          }
+        />
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-6">
+          {decoratedGroups.map((g) => (
+            <GroupCard key={g.id} group={g} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

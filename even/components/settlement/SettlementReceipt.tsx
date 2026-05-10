@@ -27,7 +27,7 @@ export function SettlementReceipt({
     <div className="max-w-sm mx-auto animate-tear-in">
       <Receipt variant="sealed">
         <ReceiptHeader
-          merchant="TAB"
+          merchant="EVEN"
           meta={`Settlement · ${timestamp.toLocaleString("en", {
             month: "short",
             day: "numeric",
@@ -70,7 +70,7 @@ export function SettlementReceipt({
 
         <div className="tear my-4" />
 
-        <div className="text-center eyebrow text-ink-mute">Thank you for using Tab.</div>
+        <div className="text-center eyebrow text-ink-mute">Thank you for using Even.</div>
       </Receipt>
     </div>
   );

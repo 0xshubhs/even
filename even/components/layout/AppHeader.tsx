@@ -19,7 +19,7 @@ export function AppHeader() {
     <header className="border-b border-paper-rim bg-paper/80 backdrop-blur-sm sticky top-0 z-30">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="font-display text-2xl tracking-tight font-semibold">
-          Tab
+          Even
         </Link>
 
         <nav className="flex items-center gap-4">

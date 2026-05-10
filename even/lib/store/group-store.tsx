@@ -27,9 +27,9 @@ export interface Settlement {
   fromMemberId: string;
   toMemberId: string;
   amountBase: bigint;
-  /** Solana tx signature, if real settlement was sent */
+  /** Solana tx signature returned by the settlement helper */
   signature?: string;
-  /** True if shielded via Umbra (in this demo, conceptually) */
+  /** True if the settlement went through Umbra's shielded path */
   shielded: boolean;
   createdAt: number;
 }
@@ -59,7 +59,7 @@ interface GroupStoreApi extends GroupStoreState {
   addSettlement: (input: Omit<Settlement, "id" | "createdAt">) => Settlement;
 }
 
-const STORAGE_KEY = "tab.store.v1";
+const STORAGE_KEY = "even.store.v1";
 
 const Ctx = createContext<GroupStoreApi | null>(null);
 

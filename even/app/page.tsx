@@ -15,17 +15,17 @@ export default function LandingPage() {
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Hero copy */}
           <div className="space-y-8">
-            <div className="space-y-2">
-              <div className="eyebrow text-ink-mute">Tab — Splitwise for crypto</div>
+            <div className="space-y-3">
+              <div className="eyebrow text-privacy">Even — shared expenses on Solana</div>
               <h1 className="font-display tracking-tight text-5xl md:text-6xl lg:text-7xl leading-[0.95] font-semibold">
                 Split anything.
                 <br />
-                Settle privately.
+                Settle <span className="accent-word">privately</span>.
               </h1>
             </div>
 
             <p className="text-lg text-ink-soft max-w-md leading-relaxed">
-              The shared-expenses app for crypto. Settle in stablecoins on Solana, with payments
+              Track shared expenses with anyone. Settle in stablecoins on Solana, with payments
               shielded so your friends don&rsquo;t see your wallet history.
             </p>
 
@@ -45,10 +45,10 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Sample receipt */}
+          {/* Receipt panel */}
           <div className="md:pt-8">
             <Receipt variant="sealed">
-              <ReceiptHeader merchant="TAB" meta="Settlement · Demo" />
+              <ReceiptHeader merchant="EVEN" meta="Settlement" />
               <div className="space-y-1">
                 <ReceiptLine label="Group" value="Goa Trip 2026" />
                 <ReceiptLine label="To" value="alice.sol" />
@@ -70,7 +70,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="tear my-4" />
-              <div className="text-center eyebrow text-ink-mute">Thank you for using Tab.</div>
+              <div className="text-center eyebrow text-ink-mute">Thank you for using Even.</div>
             </Receipt>
 
             <div className="flex justify-center mt-6">
@@ -89,7 +89,7 @@ export default function LandingPage() {
           <Feature
             eyebrow="Step 02"
             title="See who owes who"
-            body="Tab simplifies the debt graph automatically — at most n−1 settlements clear the entire group."
+            body="Even simplifies the debt graph automatically — at most n−1 settlements clear the entire group."
           />
           <Feature
             eyebrow="Step 03"
@@ -100,7 +100,7 @@ export default function LandingPage() {
 
         <div className="tear mt-24" />
         <footer className="mt-8 flex flex-wrap items-center justify-between gap-4 text-xs text-ink-mute font-mono">
-          <span>© Tab — built for Solana Frontier 2026</span>
+          <span>© Even — built on Solana</span>
           <span>Devnet · USDC · Umbra Privacy</span>
         </footer>
       </div>
@@ -120,7 +120,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Feature({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
     <div className="space-y-3">
-      <div className="eyebrow text-ink-mute">{eyebrow}</div>
+      <div className="eyebrow text-privacy">{eyebrow}</div>
       <h3 className="font-display text-2xl tracking-tight">{title}</h3>
       <p className="text-sm text-ink-soft leading-relaxed">{body}</p>
     </div>
