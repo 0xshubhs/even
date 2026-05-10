@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+**/.next/
+out/
+**/out/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Build cache
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.vercel
+*.log
