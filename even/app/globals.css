@@ -35,15 +35,11 @@
     --privacy: 248 80% 74%;
     --privacy-tint: 248 40% 18%;
 
-    /* Texture — softer, larger-grain silver noise. Lower baseFrequency = bigger
-       cells = smoother, less digital feel. Lower opacity so it sits under the
-       type, not on it. */
-    --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='1' stitchTiles='stitch' /%3E%3CfeColorMatrix values='0 0 0 0 0.78 0 0 0 0 0.80 0 0 0 0 0.86 0 0 0 0.045 0' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' /%3E%3C/svg%3E");
-
-    /* Atmospheric glow — soft indigo radial centred top-left + a vermillion
-       hint bottom-right, so pages have depth instead of reading as a flat slab. */
-    --ambient: radial-gradient(120% 80% at 12% -10%, hsl(var(--privacy) / 0.13) 0%, transparent 55%),
-               radial-gradient(70% 60% at 92% 110%, hsl(var(--accent) / 0.06) 0%, transparent 60%);
+    /* Texture — fine, even film grain. High baseFrequency = small grain that
+       reads as continuous paper rather than discrete dots. Low opacity (0.03)
+       so the grain sits under the type, never on it. stitchTiles avoids seams
+       when the SVG repeats. */
+    --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch' /%3E%3CfeColorMatrix values='0 0 0 0 0.82 0 0 0 0 0.84 0 0 0 0 0.90 0 0 0 0.030 0' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' /%3E%3C/svg%3E");
 
     --font-display: 'Cormorant Garamond', Georgia, serif;
     --font-body: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -59,10 +55,10 @@
   }
 
   body {
-    background-image: var(--noise), var(--ambient);
-    background-attachment: fixed, fixed;
-    background-size: 320px 320px, auto;
-    background-repeat: repeat, no-repeat;
+    background-image: var(--noise);
+    background-attachment: fixed;
+    background-size: 240px 240px;
+    background-repeat: repeat;
   }
 
   ::selection {
