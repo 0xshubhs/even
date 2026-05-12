@@ -1,8 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd even && npm install && npm run build",
-  "outputDirectory": "even/.next",
-  "installCommand": "echo \"deferred to buildCommand\"",
-  "framework": "nextjs",
-  "devCommand": "cd even && npm run dev"
-}
