@@ -7,11 +7,13 @@ import {
 } from "@bonfida/spl-name-service";
 
 /**
- * SNS only lives on mainnet, even when settlements happen on devnet — Even
- * does identity lookups against mainnet and uses the resolved wallet on devnet.
- * Hardcoded so Vercel doesn't need an extra env var.
+ * SNS only lives on mainnet, even when settlements happen on devnet.
+ *
+ * `api.mainnet-beta.solana.com` rate-limits `getMultipleAccountsInfo` (used
+ * internally by `resolve`) hard enough that lookups fail with HTTP 429, so we
+ * pin to publicnode, which serves SNS lookups without throttling.
  */
-export const SNS_RPC_URL = "https://api.mainnet-beta.solana.com";
+export const SNS_RPC_URL = "https://solana-rpc.publicnode.com";
 
 let cachedConnection: Connection | null = null;
 function getConn() {
@@ -48,7 +50,6 @@ export async function reverseLookupSnsHandle(wallet: string): Promise<string | n
   } catch {
     // fall through to manual reverse below
   }
-  // No primary set — try resolving any owned domain via the standard reverse table.
   try {
     const { pubkey } = getDomainKeySync(wallet);
     const name = await reverseLookup(getConn(), pubkey);
