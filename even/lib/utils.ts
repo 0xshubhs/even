@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { TOKEN, baseToToken, formatToken, tokenToBase } from "./token-config";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,15 +12,15 @@ export function shortAddress(addr: string, chars = 4) {
   return `${addr.slice(0, chars)}…${addr.slice(-chars)}`;
 }
 
-/** USDC has 6 decimals on Solana. */
-export const usdcToBase = (uiAmount: number): bigint =>
-  BigInt(Math.round(uiAmount * 1_000_000));
+/**
+ * Settlement-token helpers. The legacy names (`usdcToBase`, `baseToUsdc`,
+ * `formatUsd`) are kept as aliases so existing callers compile; new code
+ * should prefer `tokenToBase` / `baseToToken` / `formatToken` directly.
+ */
+export const usdcToBase = tokenToBase;
+export const baseToUsdc = baseToToken;
+export const formatUsd = formatToken;
 
-export const baseToUsdc = (base: bigint): number =>
-  Number(base) / 1_000_000;
-
-export function formatUsd(base: bigint, opts?: { signed?: boolean }): string {
-  const n = baseToUsdc(base < 0n ? -base : base);
-  const sign = opts?.signed ? (base < 0n ? "-" : base > 0n ? "+" : "") : "";
-  return `${sign}$${n.toFixed(2)}`;
-}
+/** Display the configured token symbol (e.g. "SOL", "USDC"). */
+export const TOKEN_SYMBOL = TOKEN.symbol;
+export const TOKEN_PREFIX = TOKEN.prefix;

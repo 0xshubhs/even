@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Button } from "@/components/ui/Button";
-import { useGroupStore } from "@/lib/store/group-store";
-import { usdcToBase } from "@/lib/utils";
+import { useGroupStore, type SplitMode } from "@/lib/store/group-store";
+import { baseToUsdc, usdcToBase } from "@/lib/utils";
 
 export default function AddExpensePage() {
   const router = useRouter();
@@ -22,9 +22,11 @@ export default function AddExpensePage() {
   const [description, setDescription] = useState("");
   const [paidBy, setPaidBy] = useState<string>("");
   const [splitBetween, setSplitBetween] = useState<Set<string>>(new Set());
+  const [splitMode, setSplitMode] = useState<SplitMode>("equal");
+  // For shares & custom: per-member-id string input. Cleared/refilled on mode change.
+  const [weights, setWeights] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
-  // Default payer = me, split = everyone
   useEffect(() => {
     if (!group) return;
     setPaidBy((prev) => prev || me?.id || group.members[0]?.id || "");
@@ -32,6 +34,31 @@ export default function AddExpensePage() {
   }, [group, me]);
 
   const splitArray = useMemo(() => Array.from(splitBetween), [splitBetween]);
+  const totalBase = useMemo(() => {
+    const n = parseFloat(amount);
+    return Number.isFinite(n) && n > 0 ? usdcToBase(n) : 0n;
+  }, [amount]);
+
+  // Reset weights on mode change so users see sensible defaults.
+  useEffect(() => {
+    if (!group) return;
+    if (splitMode === "shares") {
+      setWeights(Object.fromEntries(splitArray.map((id) => [id, "1"])));
+    } else if (splitMode === "custom") {
+      // Pre-fill with equal split as a starting point.
+      const n = splitArray.length;
+      if (n === 0 || totalBase === 0n) {
+        setWeights(Object.fromEntries(splitArray.map((id) => [id, "0.00"])));
+      } else {
+        const per = baseToUsdc(totalBase / BigInt(n));
+        setWeights(Object.fromEntries(splitArray.map((id) => [id, per.toFixed(2)])));
+      }
+    } else {
+      setWeights({});
+    }
+    // we want this only when the mode flips, not on every keystroke
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [splitMode]);
 
   if (!group) {
     return (
@@ -74,12 +101,49 @@ export default function AddExpensePage() {
     }
     if (!group) return;
 
+    let splitWeights: string[] | undefined;
+
+    if (splitMode === "shares") {
+      const ws = splitArray.map((id) => parseInt(weights[id] ?? "0", 10));
+      if (ws.some((w) => !Number.isFinite(w) || w < 0)) {
+        setError("Share counts must be non-negative integers.");
+        return;
+      }
+      if (ws.reduce((a, b) => a + b, 0) <= 0) {
+        setError("Total shares must be greater than zero.");
+        return;
+      }
+      splitWeights = ws.map(String);
+    } else if (splitMode === "custom") {
+      const amounts = splitArray.map((id) => parseFloat(weights[id] ?? "0"));
+      if (amounts.some((x) => !Number.isFinite(x) || x < 0)) {
+        setError("Amounts must be non-negative numbers.");
+        return;
+      }
+      const totalCents = amounts.reduce(
+        (acc, x) => acc + Math.round(x * 100),
+        0
+      );
+      const expectedCents = Math.round(num * 100);
+      if (totalCents !== expectedCents) {
+        setError(
+          `Per-person amounts sum to $${(totalCents / 100).toFixed(
+            2
+          )}, but the total is $${num.toFixed(2)}.`
+        );
+        return;
+      }
+      splitWeights = amounts.map((x) => usdcToBase(x).toString());
+    }
+
     addExpense({
       groupId: group.id,
       description: description.trim(),
       amountBase: usdcToBase(num),
       paidBy,
       splitBetween: splitArray,
+      splitMode,
+      splitWeights,
     });
     router.push(`/groups/${group.id}`);
   }
@@ -140,31 +204,99 @@ export default function AddExpensePage() {
         </select>
       </div>
 
-      {/* Split */}
+      {/* Split mode tabs */}
       <div className="space-y-3">
-        <label className="eyebrow text-ink-mute">Split equally between</label>
-        <div className="border-y border-dashed border-paper-rim divide-y divide-dashed divide-paper-rim">
-          {group.members.map((m) => (
-            <label
-              key={m.id}
-              className="flex items-center gap-3 py-3 cursor-pointer hover:bg-paper-deep/50 px-1"
+        <label className="eyebrow text-ink-mute">Split</label>
+        <div className="flex border border-paper-rim">
+          {(
+            [
+              { id: "equal", label: "Equal" },
+              { id: "shares", label: "By share" },
+              { id: "custom", label: "Custom amounts" },
+            ] as const
+          ).map((tab, i) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSplitMode(tab.id)}
+              className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+                i > 0 ? "border-l border-paper-rim" : ""
+              } ${
+                splitMode === tab.id
+                  ? "bg-paper-deep text-ink"
+                  : "text-ink-soft hover:text-ink"
+              }`}
             >
-              <input
-                type="checkbox"
-                checked={splitBetween.has(m.id)}
-                onChange={() => toggleSplit(m.id)}
-                className="w-4 h-4 accent-ink"
-              />
-              <span className="text-sm">
-                {me && m.id === me.id ? `${m.handle} (you)` : m.handle}
-              </span>
-              <span className="ml-auto font-mono text-xs text-ink-mute">
-                {splitBetween.has(m.id) && amount
-                  ? `$${(parseFloat(amount) / splitBetween.size).toFixed(2)}`
-                  : "—"}
-              </span>
-            </label>
+              {tab.label}
+            </button>
           ))}
+        </div>
+
+        <div className="border-y border-dashed border-paper-rim divide-y divide-dashed divide-paper-rim">
+          {group.members.map((m) => {
+            const included = splitBetween.has(m.id);
+            const numAmount = parseFloat(amount);
+            const equalPer =
+              included && splitBetween.size > 0 && Number.isFinite(numAmount)
+                ? numAmount / splitBetween.size
+                : 0;
+
+            return (
+              <div key={m.id} className="py-3 px-1">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={included}
+                    onChange={() => toggleSplit(m.id)}
+                    className="w-4 h-4 accent-ink"
+                  />
+                  <span className="text-sm flex-1">
+                    {me && m.id === me.id ? `${m.handle} (you)` : m.handle}
+                  </span>
+
+                  {splitMode === "equal" && (
+                    <span className="ml-auto font-mono text-xs text-ink-mute">
+                      {included && numAmount ? `$${equalPer.toFixed(2)}` : "—"}
+                    </span>
+                  )}
+
+                  {splitMode === "shares" && included && (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        value={weights[m.id] ?? ""}
+                        onChange={(e) =>
+                          setWeights((w) => ({ ...w, [m.id]: e.target.value }))
+                        }
+                        className="w-14 bg-paper-deep border border-paper-rim font-mono text-xs px-2 py-1 outline-none focus:border-ink"
+                      />
+                      <span className="text-[10px] text-ink-mute">shares</span>
+                    </div>
+                  )}
+
+                  {splitMode === "custom" && included && (
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="font-mono text-xs text-ink-mute">$</span>
+                      <input
+                        inputMode="decimal"
+                        value={weights[m.id] ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "" || /^\d*\.?\d{0,2}$/.test(v)) {
+                            setWeights((w) => ({ ...w, [m.id]: v }));
+                          }
+                        }}
+                        className="w-20 bg-paper-deep border border-paper-rim font-mono tabular-nums text-xs px-2 py-1 outline-none focus:border-ink"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  )}
+                </label>
+              </div>
+            );
+          })}
         </div>
       </div>
 

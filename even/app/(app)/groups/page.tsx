@@ -16,16 +16,19 @@ export default function GroupsPage() {
   const myWallet = publicKey?.toBase58() ?? null;
 
   const decoratedGroups = useMemo(() => {
-    return groups.map((g) => {
-      const me = g.members.find((m) => m.wallet === myWallet);
-      const balance = me ? netBalanceForMember(g, expenses, settlements, me.id) : 0n;
-      return {
-        id: g.id,
-        name: g.name,
-        memberCount: g.members.length,
-        yourBalanceBase: balance,
-      };
-    });
+    if (!myWallet) return [];
+    return groups
+      .filter((g) => g.members.some((m) => m.wallet === myWallet))
+      .map((g) => {
+        const me = g.members.find((m) => m.wallet === myWallet)!;
+        const balance = netBalanceForMember(g, expenses, settlements, me.id);
+        return {
+          id: g.id,
+          name: g.name,
+          memberCount: g.members.length,
+          yourBalanceBase: balance,
+        };
+      });
   }, [groups, expenses, settlements, myWallet]);
 
   return (

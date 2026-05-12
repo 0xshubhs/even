@@ -9,6 +9,7 @@ import { Receipt } from "@/components/receipt/Receipt";
 import { Button } from "@/components/ui/Button";
 import { PrivacySeal } from "@/components/ui/PrivacySeal";
 import { LedgerRow } from "@/components/group/LedgerRow";
+import { ShareGroupButton } from "@/components/group/ShareGroupButton";
 import { useGroupStore } from "@/lib/store/group-store";
 import { computeGroupDebts } from "@/lib/debt-graph/compute";
 import { baseToUsdc, shortAddress } from "@/lib/utils";
@@ -78,6 +79,9 @@ export default function GroupDetailPage() {
           <span>·</span>
           <span className="font-mono">${baseToUsdc(totalSpent).toFixed(2)} total</span>
           <PrivacySeal size="sm" label="Settlements shielded" />
+        </div>
+        <div>
+          <ShareGroupButton groupId={group.id} />
         </div>
       </header>
 
@@ -181,7 +185,11 @@ export default function GroupDetailPage() {
                 const youInvolved =
                   !!me && (s.fromMemberId === me.id || s.toMemberId === me.id);
                 return (
-                  <div key={`s-${s.id}`} className="py-4 flex items-start justify-between gap-4">
+                  <Link
+                    key={`s-${s.id}`}
+                    href={`/settlements/${s.id}`}
+                    className="py-4 flex items-start justify-between gap-4 hover:bg-paper-deep/40 -mx-2 px-2 transition-colors"
+                  >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <div className="eyebrow text-ink-mute">Settlement</div>
@@ -209,7 +217,7 @@ export default function GroupDetailPage() {
                         })}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
           </div>

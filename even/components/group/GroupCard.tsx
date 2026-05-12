@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Receipt } from "@/components/receipt/Receipt";
 import { Monogram } from "@/components/group/Monogram";
-import { baseToUsdc } from "@/lib/utils";
+import { formatToken } from "@/lib/token-config";
 
 interface GroupCardProps {
   group: {
@@ -15,7 +15,7 @@ interface GroupCardProps {
 export function GroupCard({ group }: GroupCardProps) {
   const isOwed = group.yourBalanceBase > 0n;
   const isOwing = group.yourBalanceBase < 0n;
-  const amount = baseToUsdc(group.yourBalanceBase < 0n ? -group.yourBalanceBase : group.yourBalanceBase);
+  const abs = group.yourBalanceBase < 0n ? -group.yourBalanceBase : group.yourBalanceBase;
 
   return (
     <Link href={`/groups/${group.id}`} className="group block">
@@ -36,7 +36,7 @@ export function GroupCard({ group }: GroupCardProps) {
               <>
                 <div className="eyebrow text-ink-mute">Owed to you</div>
                 <div className="font-mono tabular-nums text-2xl font-semibold text-owed-to">
-                  +${amount.toFixed(2)}
+                  +{formatToken(abs)}
                 </div>
               </>
             )}
@@ -44,7 +44,7 @@ export function GroupCard({ group }: GroupCardProps) {
               <>
                 <div className="eyebrow text-ink-mute">You owe</div>
                 <div className="font-mono tabular-nums text-2xl font-semibold text-owed">
-                  -${amount.toFixed(2)}
+                  -{formatToken(abs)}
                 </div>
               </>
             )}
@@ -52,7 +52,7 @@ export function GroupCard({ group }: GroupCardProps) {
               <>
                 <div className="eyebrow text-ink-mute">Settled</div>
                 <div className="font-mono tabular-nums text-2xl font-semibold text-ink-mute">
-                  $0.00
+                  {formatToken(0n)}
                 </div>
               </>
             )}

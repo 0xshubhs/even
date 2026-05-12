@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, X } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { Button } from "@/components/ui/Button";
 import { Monogram, deriveInitials } from "@/components/group/Monogram";
 import { useGroupStore, type Member } from "@/lib/store/group-store";
 import { shortAddress } from "@/lib/utils";
+import { looksLikeWalletAddress, resolveSnsHandle } from "@/lib/sns/resolve";
 
 export default function NewGroupPage() {
   const router = useRouter();
@@ -19,9 +20,10 @@ export default function NewGroupPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [members, setMembers] = useState<Member[]>([]);
-  const [walletInput, setWalletInput] = useState("");
+  const [identInput, setIdentInput] = useState("");
   const [handleInput, setHandleInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [resolving, setResolving] = useState(false);
 
   useEffect(() => {
     if (!connected || !publicKey) return;
@@ -32,30 +34,57 @@ export default function NewGroupPage() {
     });
   }, [connected, publicKey]);
 
-  function addMember() {
+  async function addMember() {
     setError(null);
-    const wallet = walletInput.trim();
-    const handle = handleInput.trim() || shortAddress(wallet);
+    const raw = identInput.trim();
+    if (!raw) {
+      setError("Enter a .sol handle or wallet address.");
+      return;
+    }
 
-    if (!wallet) {
-      setError("Wallet address is required.");
-      return;
+    let wallet: string | null = null;
+    let displayHandle = handleInput.trim();
+
+    if (looksLikeWalletAddress(raw)) {
+      try {
+        new PublicKey(raw);
+        wallet = raw;
+      } catch {
+        setError("Invalid Solana wallet address.");
+        return;
+      }
+    } else {
+      setResolving(true);
+      try {
+        const resolved = await resolveSnsHandle(raw);
+        if (!resolved) {
+          setError(`Couldn't resolve "${raw}.sol" on mainnet.`);
+          return;
+        }
+        wallet = resolved;
+        if (!displayHandle) {
+          displayHandle = raw.replace(/^@/, "").replace(/\.sol$/i, "") + ".sol";
+        }
+      } finally {
+        setResolving(false);
+      }
     }
-    try {
-      new PublicKey(wallet);
-    } catch {
-      setError("Invalid Solana wallet address.");
-      return;
-    }
+
+    if (!wallet) return;
     if (members.some((m) => m.wallet === wallet)) {
       setError("That wallet is already a member.");
       return;
     }
+
     setMembers((prev) => [
       ...prev,
-      { id: Math.random().toString(36).slice(2, 10), handle, wallet },
+      {
+        id: Math.random().toString(36).slice(2, 10),
+        handle: displayHandle || shortAddress(wallet!),
+        wallet: wallet!,
+      },
     ]);
-    setWalletInput("");
+    setIdentInput("");
     setHandleInput("");
   }
 
@@ -99,12 +128,7 @@ export default function NewGroupPage() {
       </div>
 
       <div className="space-y-8">
-        <Field
-          label="Name"
-          placeholder="Goa Trip 2026"
-          value={name}
-          onChange={setName}
-        />
+        <Field label="Name" placeholder="Goa Trip 2026" value={name} onChange={setName} />
         <Field
           label="Description (optional)"
           placeholder="What is this group for?"
@@ -114,23 +138,37 @@ export default function NewGroupPage() {
 
         <div className="space-y-3">
           <Label>Members</Label>
+          <p className="text-xs text-ink-mute -mt-1">
+            Use a <span className="font-mono">.sol</span> handle (resolved on mainnet) or paste a
+            wallet address directly. Settlements still happen on devnet.
+          </p>
 
           <div className="grid sm:grid-cols-[1fr_auto_auto] gap-2">
             <Field
               label=""
-              placeholder="Solana wallet address"
-              value={walletInput}
-              onChange={setWalletInput}
+              placeholder="alice.sol or wallet address"
+              value={identInput}
+              onChange={setIdentInput}
               mono
             />
             <Field
               label=""
-              placeholder="Display name"
+              placeholder="Display name (optional)"
               value={handleInput}
               onChange={setHandleInput}
             />
-            <Button onClick={addMember} variant="paper" type="button" className="self-end h-[42px]">
-              <Plus className="w-4 h-4" />
+            <Button
+              onClick={addMember}
+              variant="paper"
+              type="button"
+              className="self-end h-[42px]"
+              disabled={resolving}
+            >
+              {resolving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
             </Button>
           </div>
 

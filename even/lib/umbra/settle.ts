@@ -1,42 +1,53 @@
-/**
- * Settle a debt by creating a shielded UTXO from the debtor's public USDC
- * balance to the recipient's encrypted inbox. The recipient claims it later
- * via the relayer; the on-chain footprint never reveals sender, recipient,
- * or amount together.
- *
- * The production wiring uses Umbra's
- * `getPublicBalanceToReceiverClaimableUtxoCreatorFunction`. While that signer
- * setup is pending, this helper produces a transient settlement signature
- * locally so the rest of the flow — proof overlay, receipt animation, ledger
- * update — runs end-to-end.
- */
+import { getPublicBalanceToReceiverClaimableUtxoCreatorFunction } from "@umbra-privacy/sdk";
+import { getCreateReceiverClaimableUtxoFromPublicBalanceProver } from "@umbra-privacy/web-zk-prover";
+import { USDC_DEVNET_MINT } from "./constants";
+import { toAddress, toU64, type IUmbraClient } from "./types";
+
+let cachedZkProver: ReturnType<
+  typeof getCreateReceiverClaimableUtxoFromPublicBalanceProver
+> | null = null;
+function getProver() {
+  if (!cachedZkProver) {
+    cachedZkProver = getCreateReceiverClaimableUtxoFromPublicBalanceProver();
+  }
+  return cachedZkProver;
+}
 
 export interface SettleResult {
+  /** Primary on-chain settlement signature (the one to surface in the UI). */
   signature: string;
-  shielded: boolean;
+  /** Auxiliary proof-account create signature, returned by the SDK. */
+  createProofAccountSignature: string;
+  /** Optional close-proof-account signature, present when an existing one was reused. */
+  closeProofAccountSignature?: string;
+  shielded: true;
 }
 
-const PROOF_LATENCY_MS = { min: 4500, jitter: 1500 };
+/**
+ * Settle a debt by creating a receiver-claimable UTXO from the debtor's
+ * public USDC ATA.
+ */
+export async function settleDebt(
+  client: IUmbraClient,
+  params: { recipientWallet: string; amountBase: bigint; mint?: string }
+): Promise<SettleResult> {
+  const createUtxo = getPublicBalanceToReceiverClaimableUtxoCreatorFunction(
+    { client },
+    { zkProver: getProver() }
+  );
 
-export async function settleDebt(params: {
-  recipientWallet: string;
-  amountBase: bigint;
-}): Promise<SettleResult> {
-  const proofMs = PROOF_LATENCY_MS.min + Math.random() * PROOF_LATENCY_MS.jitter;
-  await new Promise((resolve) => setTimeout(resolve, proofMs));
+  const result = await createUtxo({
+    destinationAddress: toAddress(params.recipientWallet),
+    mint: toAddress(params.mint ?? USDC_DEVNET_MINT),
+    amount: toU64(params.amountBase),
+  });
 
-  const signature = generateLocalSignature(params.recipientWallet, params.amountBase);
-  return { signature, shielded: true };
-}
-
-/** Build a base58-shaped 64-char string keyed off the inputs + clock. */
-function generateLocalSignature(seed: string, amount: bigint) {
-  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  let s = "";
-  let n = BigInt(seed.length) * amount + BigInt(Date.now());
-  for (let i = 0; i < 64; i++) {
-    n = (n * 1103515245n + 12345n) & 0x7fffffffffffffffn;
-    s += alphabet[Number(n % BigInt(alphabet.length))];
-  }
-  return s;
+  return {
+    signature: String(result.createUtxoSignature),
+    createProofAccountSignature: String(result.createProofAccountSignature),
+    closeProofAccountSignature: result.closeProofAccountSignature
+      ? String(result.closeProofAccountSignature)
+      : undefined,
+    shielded: true,
+  };
 }

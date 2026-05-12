@@ -253,7 +253,11 @@ export default function DashboardPage() {
               const meId = group.members.find((m) => m.wallet === myWallet)?.id;
               const youInvolved = s.fromMemberId === meId || s.toMemberId === meId;
               return (
-                <div key={`s-${s.id}`} className="py-4 flex items-start justify-between gap-4">
+                <Link
+                  key={`s-${s.id}`}
+                  href={`/settlements/${s.id}`}
+                  className="py-4 flex items-start justify-between gap-4 hover:bg-paper-deep/40 -mx-2 px-2 transition-colors"
+                >
                   <div className="flex items-start gap-3 min-w-0">
                     <Monogram name={group.name} size="sm" />
                     <div className="min-w-0">
@@ -277,7 +281,7 @@ export default function DashboardPage() {
                       })}
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

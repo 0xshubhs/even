@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Plus, Users, Wallet } from "lucide-react";
+import { Download, LayoutDashboard, Plus, Settings, Users, Wallet } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ConnectButton } from "@/components/wallet/ConnectButton";
 import { useGroupStore } from "@/lib/store/group-store";
@@ -12,6 +12,7 @@ import { shortAddress, cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/groups", label: "Groups", icon: Users },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -41,13 +42,20 @@ export function Sidebar() {
             <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
           ))}
 
-          <div className="pt-3">
+          <div className="pt-3 space-y-2">
             <Link
               href="/groups/new"
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium border border-dashed border-paper-rim text-ink-soft hover:text-ink hover:border-ink-mute transition-colors"
             >
               <Plus className="w-4 h-4" strokeWidth={1.75} />
               New group
+            </Link>
+            <Link
+              href="/import"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm text-ink-soft hover:text-ink transition-colors"
+            >
+              <Download className="w-4 h-4" strokeWidth={1.75} />
+              Import shared group
             </Link>
           </div>
         </nav>
@@ -123,5 +131,6 @@ function NavLink({
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/groups") return pathname === "/groups" || pathname.startsWith("/groups/");
+  if (href === "/settings") return pathname === "/settings";
   return pathname === href;
 }

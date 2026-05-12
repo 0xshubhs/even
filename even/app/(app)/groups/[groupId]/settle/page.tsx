@@ -14,6 +14,7 @@ import { ProofGenerationOverlay } from "@/components/umbra/ProofGenerationOverla
 import { SettlementReceipt } from "@/components/settlement/SettlementReceipt";
 import { useGroupStore } from "@/lib/store/group-store";
 import { settleDebt } from "@/lib/umbra/settle";
+import { useUmbra } from "@/components/umbra/UmbraProvider";
 import { baseToUsdc } from "@/lib/utils";
 
 export default function SettlePage() {
@@ -30,6 +31,7 @@ function SettleInner() {
   const search = useSearchParams();
   const { publicKey } = useWallet();
   const { groups, addSettlement } = useGroupStore();
+  const { client: umbraClient, status: umbraStatus } = useUmbra();
 
   const group = groups.find((g) => g.id === params.groupId);
   const fromId = search.get("from") ?? "";
@@ -77,10 +79,18 @@ function SettleInner() {
       return;
     }
     if (!toMember || !group) return;
+    if (!umbraClient) {
+      setError(
+        umbraStatus.state === "error"
+          ? umbraStatus.message
+          : "Connecting to Umbra… try again in a moment."
+      );
+      return;
+    }
 
     setPhase("proving");
     try {
-      const result = await settleDebt({
+      const result = await settleDebt(umbraClient, {
         recipientWallet: toMember.wallet,
         amountBase,
       });
@@ -96,9 +106,20 @@ function SettleInner() {
       setPhase("done");
     } catch (e) {
       console.error(e);
-      setError(e instanceof Error ? e.message : "Settlement failed.");
+      const raw = e instanceof Error ? e.message : "Settlement failed.";
+      // Translate Umbra's "receiver not registered" into a clear user-facing
+      // message — the recipient must connect to Even themselves once to set up
+      // their shielded inbox before anyone can settle to them.
+      const niceMessage = /receiver is not registered/i.test(raw)
+        ? `${toMember.handle} hasn't set up their private inbox yet. Ask them to open Even with their wallet (${shortWallet(toMember.wallet)}) connected — registration is automatic, then settlement will work.`
+        : raw;
+      setError(niceMessage);
       setPhase("confirm");
     }
+  }
+
+  function shortWallet(w: string) {
+    return w.length > 8 ? `${w.slice(0, 4)}…${w.slice(-4)}` : w;
   }
 
   return (

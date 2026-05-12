@@ -6,6 +6,38 @@ Submitted to the **Solana Frontier Hackathon** (Colosseum 2026) across three spo
 
 ---
 
+## Running locally
+
+```bash
+cd even
+cp .env.example .env.local      # optional: set DEMO_WALLET_SECRET_KEY for headless demos
+npm install
+npm run dev                     # http://localhost:3000
+```
+
+Connect Phantom or Solflare on **devnet** and open **/dashboard**. The first action that needs your Umbra master seed (registration, settling a debt) triggers a `signMessage` prompt.
+
+## Deploying to Vercel
+
+The Next.js app lives at `even/`, not the repo root. Either:
+
+- **Easiest:** in Vercel project settings, set **Root Directory** = `even/`. Vercel auto-detects Next.js from there.
+- **Or** keep the included `vercel.json` (root-level), which runs `cd even && npm install && npm run build` for you.
+
+Set these env vars in Vercel (Production + Preview):
+
+```
+NEXT_PUBLIC_SOLANA_NETWORK=devnet
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_RPC_WSS_URL=wss://api.devnet.solana.com
+NEXT_PUBLIC_USDC_MINT=Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr
+NEXT_PUBLIC_SNS_RPC_URL=https://api.mainnet-beta.solana.com
+NEXT_PUBLIC_UMBRA_INDEXER_URL=https://utxo-indexer.api-devnet.umbraprivacy.com
+NEXT_PUBLIC_UMBRA_RELAYER_URL=https://relayer.api-devnet.umbraprivacy.com
+```
+
+---
+
 ## Why this exists
 
 Every public-blockchain payment broadcasts your financial life. The moment you pay a friend in stablecoins, they can read your entire transaction history on Solscan — that's *worse* than Venmo, not better.

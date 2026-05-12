@@ -10,11 +10,16 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@bonfida/spl-name-service": "3.0.21",
     "@solana/web3.js": "^1.95.3",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@supabase/supabase-js": "^2.45.4",
+    "@umbra-privacy/sdk": "2.1.1",
+    "@umbra-privacy/web-zk-prover": "2.0.1",
+    "bs58": "^6.0.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.453.0",
     "next": "14.2.15",
@@ -33,6 +38,9 @@
   },
   "overrides": {
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0"
+    "@types/react-dom": "^18.3.0",
+    "@umbra-privacy/web-zk-prover": {
+      "@umbra-privacy/sdk": "$@umbra-privacy/sdk"
+    }
   }
 }

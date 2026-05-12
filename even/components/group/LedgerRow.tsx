@@ -2,7 +2,7 @@
 
 import { ArrowRight, Lock } from "lucide-react";
 import { SettleButton } from "@/components/ui/SettleButton";
-import { baseToUsdc } from "@/lib/utils";
+import { formatToken } from "@/lib/token-config";
 
 interface LedgerRowProps {
   from: { handle: string; isYou: boolean };
@@ -12,7 +12,6 @@ interface LedgerRowProps {
 }
 
 export function LedgerRow({ from, to, amount, onSettle }: LedgerRowProps) {
-  const usd = baseToUsdc(amount);
   const youCanSettle = from.isYou && !!onSettle;
 
   return (
@@ -31,7 +30,7 @@ export function LedgerRow({ from, to, amount, onSettle }: LedgerRowProps) {
 
       <div className="flex items-center gap-4">
         <span className="font-mono tabular-nums text-lg font-semibold">
-          ${usd.toFixed(2)}
+          {formatToken(amount)}
         </span>
         {youCanSettle && (
           <div className="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150">
