@@ -56,14 +56,15 @@ export default function NewGroupPage() {
     } else {
       setResolving(true);
       try {
+        const bareHandle = raw.replace(/^@/, "").replace(/\.sol$/i, "");
         const resolved = await resolveSnsHandle(raw);
         if (!resolved) {
-          setError(`Couldn't resolve "${raw}.sol" on mainnet.`);
+          setError(`Couldn't resolve "${bareHandle}.sol" on mainnet.`);
           return;
         }
         wallet = resolved;
         if (!displayHandle) {
-          displayHandle = raw.replace(/^@/, "").replace(/\.sol$/i, "") + ".sol";
+          displayHandle = `${bareHandle}.sol`;
         }
       } finally {
         setResolving(false);
